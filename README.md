@@ -5,11 +5,13 @@ This repository includes the following parts:
 - libft library
 - Makefile
 
-## 🚀 Usage
+## 📜 Project Requirements
 
-1. Include the necessary header files in your C project.
-2. Link against the library libftprintf.a which contains the ft_printf function.
-3. Call the `ft_printf` function with a format string and optional arguments.
+- The `libftprintf.a` will be created at the root of the repository.
+- This implementation doesn't include all of the features found in the original `printf`.
+  - For example:
+    - Buffer management
+    - Output formatting
 
 ## ✨ Supported Conversions
 
@@ -22,10 +24,8 @@ This repository includes the following parts:
 - `%X`:  Numbers in uppercase hexadecimal (base 16) format.
 - `%%`: Percent sign.
 
-## 📜 Project Requirements
+## 🚀 Usage
 
-- The `libftprintf.a` will be created at the root of the repository.
-- This implementation doesn't include all of the features found in the original `printf`.
-  - For example:
-    - Buffer management
-    - Output formatting
+1. Include the necessary header files in your C project.
+2. Link against the library libftprintf.a which contains the ft_printf function.
+3. Call the `ft_printf` function with a format string and optional arguments.
