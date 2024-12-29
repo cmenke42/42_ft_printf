@@ -1,57 +1,90 @@
-# **************************************************************************** #
-#                                                                              #
-#                                                         :::      ::::::::    #
-#    Makefile                                           :+:      :+:    :+:    #
-#                                                     +:+ +:+         +:+      #
-#    By: cmenke <cmenke@student.42.fr>              +#+  +:+       +#+         #
-#                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2022/12/13 09:41:00 by cmenke            #+#    #+#              #
-#    Updated: 2023/01/06 15:19:11 by cmenke           ###   ########.fr        #
-#                                                                              #
-# **************************************************************************** #
+NAME			:= libftprintf.a
+CC				:= cc
+RM				:= rm -rf
+# -r: Replace or add files in archive
+# -s: Add/update object-file index (symbol table) -> faster linking
+AR				:= ar -rs
 
-#ar -r ->replace exising files or create a new one if. 
-#ar -c -> silence the information message.
-#ar -s -> adds or updates an onject-file index to the archive.
+SRC_DIR			:= src
+INCLUDES_DIR	:= includes
+OBJ_DIR			:= obj
+DEPENDENCY_DIR	:= dependencies
+LIBFT_DIR		:= libft
 
-NAME = libftprintf.a
+LIBFT			:= ${LIBFT_DIR}/libft.a
 
-SRC = ft_printf.c
+INCLUDES		:= -I ${INCLUDES_DIR} -I ${LIBFT_DIR}/includes
 
-SUBDIR = libft
+SRCS := ft_printf.c
 
-SUBOBJS = libft/libft.a
+OBJS := $(patsubst %.c, ${OBJ_DIR}/%.o, ${SRCS})
+DEPS := $(patsubst %.c, ${DEPENDENCY_DIR}/%.d, ${SRCS})
 
-OBJS = ${SRC:.c=.o}
+# Production flags
+CFLAGS := -Wall -Werror -Wextra
+CPPFLAGS = ${INCLUDES}
 
-CC = cc
+## Development flags
+ifeq ($(LIBFT_PRINTF_DEV), 1)
+    # -MMD: Generate dependency file without system header files
+    # -MP: Create an empty rule for each header file mentioned in the dependency file,
+    #      avoids make errors if a header file is deleted
+    # -MF: Specify the output file name for the dependency file
+    # $*: Stem of the target, the % part of the pattern rule
 
-RM = rm -f
+    CPPFLAGS += -MMD -MP -MF ${DEPENDENCY_DIR}/$*.d
 
-AR = ar -rc
+    CFLAGS += -g -O0
+    CFLAGS += -fsanitize=undefined
+    CFLAGS += -fsanitize=address
 
-CFLAGS = -Wall -Werror -Wextra
+else
+    LIBFT_PRINTF_DEV := 0
+endif
 
-all :	${SUBDIR} ${NAME}
+# Add includes
+CFLAGS += ${INCLUDES}
 
-${NAME}: ${OBJS}
-	cp ${SUBOBJS} ./${NAME}
+# Rules
+all : info library ${NAME}
+
+info:
+	@echo "To compile with development flags, run: make LIBFT_PRINTF_DEV=1"
+	@echo "LIBFT_PRINTF_DEV: ${LIBFT_PRINTF_DEV}"
+	@echo "-----------------------------------"
+
+library:
+	${MAKE} -C ${LIBFT_DIR}
+
+# $? -> list of dependencies that are newer than the target
+${NAME}: ${LIBFT} ${OBJS}
+	cp ${LIBFT} ./${NAME}
 	${AR} ${NAME} ${OBJS}
 
-$(OBJS):
-	$(CC) -c $(CFLAGS) ${SRC}
+${OBJ_DIR}/%.o: ${SRC_DIR}/%.c | ${OBJ_DIR} ${DEPENDENCY_DIR}
+	mkdir -p $(dir $@)
+	${CC} ${CFLAGS} ${CPPFLAGS} -c $< -o $@
 
-${SUBDIR}:
-	cd ${SUBDIR} && ${MAKE}
+${OBJ_DIR}:
+	mkdir -p ${OBJ_DIR}
+
+${DEPENDENCY_DIR}:
+	mkdir -p ${DEPENDENCY_DIR}
 
 clean:
-	${RM} ${OBJS}
-	cd ${SUBDIR} && ${MAKE} clean
+	${RM} ${OBJ_DIR} ${DEPENDENCY_DIR}
+	${MAKE} -C ${LIBFT_DIR} clean
 
 fclean:	clean
 	${RM} ${NAME}
-	cd ${SUBDIR} && ${MAKE} fclean
+	${MAKE} -C ${LIBFT_DIR} fclean
 
 re: fclean all
 
-.PHONY: all clean fclean re ${SUBDIR}
+.PHONY: all info library clean fclean re
+
+.NOTPARALLEL:
+
+# Include the dependency files as Makefiles
+# (-) No complaints if the dependency file does not exist or cannot be remade
+-include ${DEPS}

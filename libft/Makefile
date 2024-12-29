@@ -1,92 +1,91 @@
-# **************************************************************************** #
-#                                                                              #
-#                                                         :::      ::::::::    #
-#    Makefile                                           :+:      :+:    :+:    #
-#                                                     +:+ +:+         +:+      #
-#    By: cmenke <cmenke@student.42.fr>              +#+  +:+       +#+         #
-#                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2022/12/13 09:41:00 by cmenke            #+#    #+#              #
-#    Updated: 2022/12/30 14:27:54 by cmenke           ###   ########.fr        #
-#                                                                              #
-# **************************************************************************** #
+NAME			:= libft.a
+CC				:= cc
+RM				:= rm -rf
+# -r: Replace or add files in archive
+# -s: Add/update object-file index (symbol table) -> faster linking
+AR				:= ar -rs
 
-#ar -r ->replace exising files or create a new one if. 
-#ar -c -> silence the information message.
-#ar -s -> adds or updates an onject-file index to the archive.
-#bonus depends on OBJS and OBJSBONUS and create a new libft.a,
-#since its a bonus its not directly depending on name
-NAME = libft.a
+SRC_DIR			:= src
+INCLUDES_DIR	:= includes
+OBJ_DIR			:= obj
+DEPENDENCY_DIR	:= dependencies
 
-SRC = ft_isalpha.c \
-	ft_isdigit.c \
-	ft_isalnum.c \
-	ft_isascii.c \
-	ft_isprint.c \
-	ft_strlen.c \
-	ft_memset.c \
-	ft_bzero.c \
-	ft_memcpy.c \
-	ft_memmove.c \
-	ft_strlcpy.c \
-	ft_strlcat.c \
-	ft_toupper.c \
-	ft_tolower.c \
-	ft_strchr.c \
-	ft_strrchr.c \
-	ft_strncmp.c \
-	ft_memchr.c \
-	ft_memcmp.c \
-	ft_strnstr.c \
-	ft_atoi.c \
-	ft_calloc.c \
-	ft_strdup.c \
-	ft_substr.c \
-	ft_strjoin.c \
-	ft_strtrim.c \
-	ft_split.c \
-	ft_itoa.c \
-	ft_strmapi.c \
-	ft_striteri.c \
-	ft_putchar_fd.c \
-	ft_putstr_fd.c \
-	ft_putendl_fd.c \
-	ft_putnbr_fd.c
+INCLUDES		:= -I ${INCLUDES_DIR}
 
-OBJS = ${SRC:.c=.o}
+SRCS := ft_atoi.c ft_bzero.c ft_calloc.c \
+		ft_isalnum.c ft_isalpha.c ft_isascii.c \
+		ft_isdigit.c ft_isprint.c ft_itoa.c \
+		ft_lstadd_back.c ft_lstadd_front.c \
+		ft_lstclear.c ft_lstdelone.c ft_lstiter.c \
+		ft_lstlast.c ft_lstmap.c ft_lstnew.c \
+		ft_lstsize.c ft_memchr.c ft_memcmp.c \
+		ft_memcpy.c ft_memmove.c ft_memset.c \
+		ft_putchar_fd.c ft_putendl_fd.c \
+		ft_putnbr_fd.c ft_putstr_fd.c ft_split.c \
+		ft_strchr.c ft_strdup.c ft_striteri.c \
+		ft_strjoin.c ft_strlcat.c ft_strlcpy.c \
+		ft_strlen.c ft_strmapi.c ft_strncmp.c \
+		ft_strnstr.c ft_strrchr.c ft_strtrim.c \
+		ft_substr.c ft_tolower.c ft_toupper.c \
 
-SRCBONUS = ft_lstnew.c \
-		ft_lstadd_front.c \
-		ft_lstsize.c \
-		ft_lstlast.c \
-		ft_lstadd_back.c \
-		ft_lstdelone.c \
-		ft_lstclear.c \
-		ft_lstiter.c \
-		ft_lstmap.c
+OBJS := $(patsubst %.c, ${OBJ_DIR}/%.o, ${SRCS})
+DEPS := $(patsubst %.c, ${DEPENDENCY_DIR}/%.d, ${SRCS})
 
-OBJSBONUS = ${SRCBONUS:.c=.o}
+# Production flags
+CFLAGS := -Wall -Werror -Wextra
+CPPFLAGS = ${INCLUDES}
 
-CC = cc
+## Development flags
+ifeq ($(LIBFT_DEV), 1)
+    # -MMD: Generate dependency file without system header files
+    # -MP: Create an empty rule for each header file mentioned in the dependency file,
+    #      avoids make errors if a header file is deleted
+    # -MF: Specify the output file name for the dependency file
+    # $*: Stem of the target, the % part of the pattern rule
+    
+    CPPFLAGS += -MMD -MP -MF ${DEPENDENCY_DIR}/$*.d
+    
+    CFLAGS += -g -O0
+    CFLAGS += -fsanitize=undefined
+    CFLAGS += -fsanitize=address
+else
+    LIBFT_DEV := 0
+endif
 
-CFLAGS = -Wall -Werror -Wextra
+# Rules
+all : info ${NAME}
 
-all :	${NAME}
+info:
+	@echo "To compile with development flags, run: make LIBFT_DEV=1"
+	@echo "LIBFT_DEV: ${LIBFT_DEV}"
+	@echo "-----------------------------------"
 
+# $? -> list of dependencies that are newer than the target
 ${NAME}: ${OBJS}
-	ar -rc ${NAME} ${OBJS}
+	${AR} ${NAME} $?
 
-$(OBJS):
-	$(CC) -c $(CFLAGS) ${SRC}
+${OBJ_DIR}/%.o: ${SRC_DIR}/%.c | ${OBJ_DIR} ${DEPENDENCY_DIR}
+	mkdir -p $(dir $@)
+	${CC} ${CFLAGS} ${CPPFLAGS} -c $< -o $@
+
+${OBJ_DIR}:
+	mkdir -p ${OBJ_DIR}
+
+${DEPENDENCY_DIR}:
+	mkdir -p ${DEPENDENCY_DIR}
 
 clean:
-	rm -f ${OBJS} ${OBJSBONUS}
+	${RM} ${OBJ_DIR} ${DEPENDENCY_DIR}
 
 fclean:	clean
-	rm -f ${NAME}
+	${RM} ${NAME}
 
 re: fclean all
 
-bonus: $(OBJS) ${OBJSBONUS}
-	ar -rc ${NAME} ${OBJS} ${OBJSBONUS}
+.PHONY: all info clean fclean re
 
-.PHONY: all clean fclean re bonus
+.NOTPARALLEL:
+
+# Include the dependency files as Makefiles
+# (-) No complaints if the dependency file does not exist or cannot be remade
+-include ${DEPS}

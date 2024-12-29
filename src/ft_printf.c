@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_printf.h"
+#include "libftprintf.h"
 
 //prints the unsigned nbr.
 static void	ft_nbr(long unsigned int num, int *cnt, char *ba, unsigned int len)
