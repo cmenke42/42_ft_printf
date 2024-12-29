@@ -1,20 +1,65 @@
-## 📁 Project Structure
+# 📚 42_ft_printf
 
-This repository includes the following parts:
-- Implementation of ft_printf
-- libft library
-- Makefile
+This project contains the basic 42_libft library and a custom limited implementation of the `printf` function. For more information on the libft library, see the [42_libft README](https://github.com/cmenke42/42_libft).
 
-## 📜 Project Requirements
+## 📖 Table of Contents
+- [🚀 Getting Started](#-getting-started)
+- [🔎 Example Usage](#-example-usage)
+- [✨ Supported Conversions](#-supported-conversions)
+- [🛑 Limitations](#-limitations)
 
-- The `libftprintf.a` will be created at the root of the repository.
-- This implementation doesn't include all of the features found in the original `printf`.
-  - For example:
-    - Buffer management
-    - Output formatting
+## 🚀 Getting Started
+1. Clone the repository:
+    ```sh
+    git clone git@github.com:cmenke42/42_ft_printf.git
+    ```
+2. Build the library:
+    ```sh
+    make -C 42_ft_printf
+    ```
+3. Include the library in your project by adding the include path and linking against `libftprintf.a`:
+    ```sh
+    cc -I 42_ft_printf/includes -o target main.c -L42_ft_printf -lftprintf
+    ```
+
+    <details>
+    <summary>Explanation of the command</summary>
+
+    - `cc`: Invokes the C compiler.
+    - `-I 42_ft_printf/includes`: Adds the `42_ft_printf/includes` directory to the list of directories to search for header files.
+    - `-L42_ft_printf`: Adds the `42_ft_printf` directory to the list of directories to search for libraries.
+    - `-lftprintf`: Searches for a library named `libftprintf.a` when linking. The `lib` prefix and `.a` extension are added automatically.
+    - `-o target`: Specifies the output executable name as `target`.
+    - `source.c`: The source file to compile.
+
+    </details>
+
+    This command assumes a project structure like this:
+    ```text
+    project_root/
+    ├── 42_ft_printf/
+    │   ├── includes/
+    │   │   └── libftprintf.h
+    │   ├── libft
+    │   ├── Makefile
+    │   ├── README.md
+    │   └── src/
+    │       └── [ft_printf.c, ...]
+    └── main.c
+    ```
+
+## 🔎 Example Usage
+```c
+#include "libftprintf.h"
+
+int main(void)
+{
+    ft_printf("Hello, %s!\n", "world");
+    return 0;
+}
+```
 
 ## ✨ Supported Conversions
-
 - `%c`: A char.
 - `%s`: A null terminated string.
 - `%p`: Void pointer arguments in hexadecimal format.
@@ -24,8 +69,8 @@ This repository includes the following parts:
 - `%X`:  Numbers in uppercase hexadecimal (base 16) format.
 - `%%`: Percent sign.
 
-## 🚀 Usage
-
-1. Include the necessary header files in your C project.
-2. Link against the library libftprintf.a which contains the ft_printf function.
-3. Call the `ft_printf` function with a format string and optional arguments.
+## 🛑 Limitations
+- This implementation doesn't include all of the features found in the original `printf`.
+  - For example:
+    - Buffer management
+    - Output formatting
